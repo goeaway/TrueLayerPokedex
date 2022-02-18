@@ -1,0 +1,84 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{15C8FF49-0B18-4D60-AA6C-2019EF0D74B5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{715C71B2-2ABE-40F8-AAFF-D15E6377DB77}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{F07D9173-93FA-4419-AEE0-7D17751C8AB2}"
+ProjectSection(SolutionItems) = preProject
+	deploy\Dockerfile = deploy\Dockerfile
+EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueLayerPokedex", "src\TrueLayerPokedex\TrueLayerPokedex.csproj", "{4A407AF4-4F8C-4145-B0D0-A26FE3EBBBDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueLayerPokedex.Application", "src\TrueLayerPokedex.Application\TrueLayerPokedex.Application.csproj", "{88C34104-940B-4425-B120-B60CAB716420}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueLayerPokedex.Domain", "src\TrueLayerPokedex.Domain\TrueLayerPokedex.Domain.csproj", "{86C23020-77FE-4E5C-95D5-415DEDE1F937}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueLayerPokedex.Infrastructure", "src\TrueLayerPokedex.Infrastructure\TrueLayerPokedex.Infrastructure.csproj", "{ABCA599C-0FFD-426D-ABEB-AE85EFF820E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueLayerPokedex.Tests", "test\TrueLayerPokedex.Tests\TrueLayerPokedex.Tests.csproj", "{440E9D6B-AC0E-4162-BF0A-129D8802DB3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueLayerPokedex.Domain.Tests", "test\TrueLayerPokedex.Domain.Tests\TrueLayerPokedex.Domain.Tests.csproj", "{8863E03A-5E97-44A6-89B4-CBEE2003F90A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueLayerPokedex.Application.Tests", "test\TrueLayerPokedex.Application.Tests\TrueLayerPokedex.Application.Tests.csproj", "{C2B4C8A0-AB6B-4386-B06B-1FF70C360568}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueLayerPokedex.Infrastructure.Tests", "test\TrueLayerPokedex.Infrastructure.Tests\TrueLayerPokedex.Infrastructure.Tests.csproj", "{F6F2FA10-D6C8-4E14-A095-529F1705B91B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueLayerPokedex.Tests.Integration", "test\TrueLayerPokedex.Tests.Integration\TrueLayerPokedex.Tests.Integration.csproj", "{00B51DE1-BB7C-4662-8970-E56027A24F34}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4A407AF4-4F8C-4145-B0D0-A26FE3EBBBDE} = {15C8FF49-0B18-4D60-AA6C-2019EF0D74B5}
+		{88C34104-940B-4425-B120-B60CAB716420} = {15C8FF49-0B18-4D60-AA6C-2019EF0D74B5}
+		{86C23020-77FE-4E5C-95D5-415DEDE1F937} = {15C8FF49-0B18-4D60-AA6C-2019EF0D74B5}
+		{ABCA599C-0FFD-426D-ABEB-AE85EFF820E9} = {15C8FF49-0B18-4D60-AA6C-2019EF0D74B5}
+		{440E9D6B-AC0E-4162-BF0A-129D8802DB3D} = {715C71B2-2ABE-40F8-AAFF-D15E6377DB77}
+		{8863E03A-5E97-44A6-89B4-CBEE2003F90A} = {715C71B2-2ABE-40F8-AAFF-D15E6377DB77}
+		{C2B4C8A0-AB6B-4386-B06B-1FF70C360568} = {715C71B2-2ABE-40F8-AAFF-D15E6377DB77}
+		{F6F2FA10-D6C8-4E14-A095-529F1705B91B} = {715C71B2-2ABE-40F8-AAFF-D15E6377DB77}
+		{00B51DE1-BB7C-4662-8970-E56027A24F34} = {715C71B2-2ABE-40F8-AAFF-D15E6377DB77}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4A407AF4-4F8C-4145-B0D0-A26FE3EBBBDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A407AF4-4F8C-4145-B0D0-A26FE3EBBBDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A407AF4-4F8C-4145-B0D0-A26FE3EBBBDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A407AF4-4F8C-4145-B0D0-A26FE3EBBBDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88C34104-940B-4425-B120-B60CAB716420}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88C34104-940B-4425-B120-B60CAB716420}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88C34104-940B-4425-B120-B60CAB716420}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88C34104-940B-4425-B120-B60CAB716420}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86C23020-77FE-4E5C-95D5-415DEDE1F937}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86C23020-77FE-4E5C-95D5-415DEDE1F937}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86C23020-77FE-4E5C-95D5-415DEDE1F937}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86C23020-77FE-4E5C-95D5-415DEDE1F937}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABCA599C-0FFD-426D-ABEB-AE85EFF820E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABCA599C-0FFD-426D-ABEB-AE85EFF820E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABCA599C-0FFD-426D-ABEB-AE85EFF820E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABCA599C-0FFD-426D-ABEB-AE85EFF820E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{440E9D6B-AC0E-4162-BF0A-129D8802DB3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{440E9D6B-AC0E-4162-BF0A-129D8802DB3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{440E9D6B-AC0E-4162-BF0A-129D8802DB3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{440E9D6B-AC0E-4162-BF0A-129D8802DB3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8863E03A-5E97-44A6-89B4-CBEE2003F90A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8863E03A-5E97-44A6-89B4-CBEE2003F90A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8863E03A-5E97-44A6-89B4-CBEE2003F90A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8863E03A-5E97-44A6-89B4-CBEE2003F90A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2B4C8A0-AB6B-4386-B06B-1FF70C360568}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2B4C8A0-AB6B-4386-B06B-1FF70C360568}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2B4C8A0-AB6B-4386-B06B-1FF70C360568}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2B4C8A0-AB6B-4386-B06B-1FF70C360568}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6F2FA10-D6C8-4E14-A095-529F1705B91B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6F2FA10-D6C8-4E14-A095-529F1705B91B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6F2FA10-D6C8-4E14-A095-529F1705B91B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6F2FA10-D6C8-4E14-A095-529F1705B91B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00B51DE1-BB7C-4662-8970-E56027A24F34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00B51DE1-BB7C-4662-8970-E56027A24F34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00B51DE1-BB7C-4662-8970-E56027A24F34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00B51DE1-BB7C-4662-8970-E56027A24F34}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
