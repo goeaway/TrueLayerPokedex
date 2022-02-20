@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using TrueLayerPokedex.Domain.Dtos;
+using TrueLayerPokedex.Domain.Models;
 
 namespace TrueLayerPokedex.Application.Common
 {
@@ -8,6 +9,6 @@ namespace TrueLayerPokedex.Application.Common
         public bool Success { get; set; }
         public string Message { get; set; }
         public HttpStatusCode StatusCode { get; set; }
-        public PokemonInfoDto Data { get; set; } 
+        public PokemonInfo Data { get; set; } 
     }
 }

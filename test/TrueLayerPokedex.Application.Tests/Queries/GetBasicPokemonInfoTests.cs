@@ -7,6 +7,7 @@ using NUnit.Framework;
 using TrueLayerPokedex.Application.Common;
 using TrueLayerPokedex.Application.Queries.GetBasicPokemonInfo;
 using TrueLayerPokedex.Domain.Dtos;
+using TrueLayerPokedex.Domain.Models;
 
 namespace TrueLayerPokedex.Application.Tests.Queries
 {
@@ -96,10 +97,10 @@ namespace TrueLayerPokedex.Application.Tests.Queries
                 {
                     Success = true,
                     StatusCode = HttpStatusCode.OK,
-                    Data = new PokemonInfoDto
+                    Data = new PokemonInfo
                     {
                         Name = name,
-                        IsLegendary = true,
+                        IsLegendary = isLegendary,
                         Habitat = habitat,
                         Description = description
                     }

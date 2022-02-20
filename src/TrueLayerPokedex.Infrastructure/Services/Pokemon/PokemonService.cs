@@ -1,14 +1,12 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Ardalis.GuardClauses;
 using TrueLayerPokedex.Application.Common;
-using TrueLayerPokedex.Domain.Dtos;
+using TrueLayerPokedex.Domain.Models;
 
 namespace TrueLayerPokedex.Infrastructure.Services.Pokemon
 {
@@ -45,7 +43,7 @@ namespace TrueLayerPokedex.Infrastructure.Services.Pokemon
                 {
                     Success = true,
                     StatusCode = HttpStatusCode.OK,
-                    Data = new PokemonInfoDto
+                    Data = new PokemonInfo
                     {
                         Name = responseContent.Name,
                         IsLegendary = responseContent.IsLegendary,

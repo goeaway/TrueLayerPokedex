@@ -253,7 +253,8 @@ namespace TrueLayerPokedex.Infrastructure.Tests.Services
         [Test]
         public async Task GetPokemonDataAsync_Returns_Description_Without_Control_Characters()
         {
-            const string descriptionFromApi = "When several of\nthese POKéMON\ngather, their\felectricity could\nbuild and cause\nlightning storms.";
+            const string descriptionFromApi = 
+                "When several of\nthese POKéMON\ngather, their\felectricity could\nbuild and cause\nlightning storms.";
             const string descriptionFixed =
                 "When several of these POKéMON gather, their electricity could build and cause lightning storms.";
             
