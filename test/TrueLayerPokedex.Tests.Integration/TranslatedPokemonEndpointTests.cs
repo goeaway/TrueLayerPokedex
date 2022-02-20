@@ -9,6 +9,7 @@ namespace TrueLayerPokedex.Tests.Integration
     public class TranslatedPokemonEndpointTests
     {
         [Test]
+        [Category("Integration")]
         public async Task Can_Get_Data_From_PokeApi()
         {
             const string name = "mewtwo", 
