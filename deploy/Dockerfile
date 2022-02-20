@@ -1,11 +1,11 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
 WORKDIR /app
 
 COPY . ./
 RUN dotnet restore ./src/TrueLayerPokedex/TrueLayerPokedex.csproj 
 RUN dotnet publish ./src/TrueLayerPokedex/TrueLayerPokedex.csproj -c Debug -o out
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime-env
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime-env
 
 # Below allows for debugging in Rider IDE
 RUN apt-get update
