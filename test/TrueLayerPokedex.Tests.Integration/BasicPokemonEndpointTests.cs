@@ -13,7 +13,7 @@ namespace TrueLayerPokedex.Tests.Integration
         public async Task Can_Get_Data_From_PokeApi()
         {
             const string name = "mewtwo", 
-                desc = "It was created by\na scientist after\nyears of horrific\fgene splicing and\nDNA engineering\nexperiments.", 
+                desc = "It was created by a scientist after years of horrific gene splicing and DNA engineering experiments.", 
                 habitat = "rare";
             
             const bool isLegendary = true;
