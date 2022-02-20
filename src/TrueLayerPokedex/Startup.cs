@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TrueLayerPokedex.Application.Queries.GetBasicPokemonInfo;
+using TrueLayerPokedex.Domain;
+using TrueLayerPokedex.Domain.Options;
 using TrueLayerPokedex.Infrastructure;
 
 namespace TrueLayerPokedex
@@ -28,6 +30,10 @@ namespace TrueLayerPokedex
 
             services.AddMediatR(Assembly.GetAssembly(typeof(GetBasicPokemonInfoQuery)));
             services.AddInfrastructure(Configuration);
+            services.AddScoped<IUtcNowProvider, UtcNowProvider>();
+
+            services.Configure<CachingOptions>(Configuration.GetSection("Caching"));
+            services.AddDistributedMemoryCache();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
