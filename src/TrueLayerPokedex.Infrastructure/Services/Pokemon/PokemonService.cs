@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Ardalis.GuardClauses;
@@ -49,7 +50,7 @@ namespace TrueLayerPokedex.Infrastructure.Services.Pokemon
                         Name = responseContent.Name,
                         IsLegendary = responseContent.IsLegendary,
                         Habitat = responseContent.Habitat?.Name,
-                        Description = responseContent.FlavorTextEntries?.FirstOrDefault(fte => fte.Language?.Name == "en")?.FlavorText
+                        Description = ReplaceControlCharacters(responseContent.FlavorTextEntries?.FirstOrDefault(fte => fte.Language?.Name == "en")?.FlavorText)
                     }
                 };
             }
@@ -63,6 +64,16 @@ namespace TrueLayerPokedex.Infrastructure.Services.Pokemon
                 };
             }
 
+        }
+
+        private static string ReplaceControlCharacters(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return text;
+            }
+
+            return string.Join("", text.Select(c => char.IsControl(c) ? ' ' : c));
         }
     }
 }

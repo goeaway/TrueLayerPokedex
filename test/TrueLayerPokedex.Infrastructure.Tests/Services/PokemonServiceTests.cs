@@ -249,5 +249,37 @@ namespace TrueLayerPokedex.Infrastructure.Tests.Services
             Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
             Assert.IsNull(result.Data.Description);
         }
+        
+        [Test]
+        public async Task GetPokemonDataAsync_Returns_Description_Without_Control_Characters()
+        {
+            const string descriptionFromApi = "When several of\nthese POKéMON\ngather, their\felectricity could\nbuild and cause\nlightning storms.";
+            const string descriptionFixed =
+                "When several of these POKéMON gather, their electricity could build and cause lightning storms.";
+            
+            const string name = "mewtwo";
+            
+            _mockHttp.When("/pokemon-species/*")
+                .Respond("application/json", JsonSerializer.Serialize(new PokemonData
+                {
+                    Name = name,
+                    FlavorTextEntries = new List<PokemonData.FlavorTextEntry>
+                    {
+                        new ()
+                        {
+                            Language = new PokemonData.Language { Name = "en" },
+                            FlavorText = descriptionFromApi
+                        }
+                    }
+                }));
+
+            var result = await _sut.GetPokemonDataAsync(name, default);
+            
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+            Assert.IsNull(result.Message);
+            Assert.AreEqual(name, result.Data.Name);
+            Assert.AreEqual(descriptionFixed, result.Data.Description);
+        }
     }
 }
