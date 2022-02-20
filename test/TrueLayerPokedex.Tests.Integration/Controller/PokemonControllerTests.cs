@@ -84,15 +84,15 @@ namespace TrueLayerPokedex.Tests.Integration.Controller
             Assert.AreEqual(isLegendary, resultContent.IsLegendary);
         }
         
-        [Test]
-        public async Task Translation_Returns_404_If_PokemonName_Not_Provided()
-        {
-            var (client, _) = Setup.CreateServer(services => {});
-
-            var result = await client.GetAsync("/pokemon/translated/");
-            
-            Assert.AreEqual(HttpStatusCode.NotFound, result.StatusCode);
-        }
+        // [Test]
+        // public async Task Translation_Returns_404_If_PokemonName_Not_Provided()
+        // {
+        //     var (client, _) = Setup.CreateServer(services => {});
+        //
+        //     var result = await client.GetAsync("/pokemon/translated/");
+        //     
+        //     Assert.AreEqual(HttpStatusCode.NotFound, result.StatusCode);
+        // }
         
         [Test]
         public async Task Translation_Returns_404_If_Pokemon_Service_Returns_404()
