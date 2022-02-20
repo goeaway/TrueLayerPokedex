@@ -18,18 +18,6 @@ namespace TrueLayerPokedex.Controllers
             _mediator = mediator;
         }
         
-        [HttpGet("translated/{pokemonName}")]
-        public async Task<IActionResult> GetTranslatedInfo(string pokemonName, CancellationToken cancellationToken)
-        {
-            var result = await _mediator
-                .Send(new GetTranslatedPokemonInfoQuery
-                {
-                    PokemonName = pokemonName
-                }, cancellationToken);
-
-            return result.Match(Ok, error => StatusCode((int) error.StatusCode, error));
-        }
-
         [HttpGet("{pokemonName}")]
         public async Task<IActionResult> GetBasicInfo(string pokemonName, CancellationToken cancellationToken)
         {
@@ -44,5 +32,16 @@ namespace TrueLayerPokedex.Controllers
                     error => StatusCode((int) error.StatusCode, error));
         }
 
+        [HttpGet("translated/{pokemonName}")]
+        public async Task<IActionResult> GetTranslatedInfo(string pokemonName, CancellationToken cancellationToken)
+        {
+            var result = await _mediator
+                .Send(new GetTranslatedPokemonInfoQuery
+                {
+                    PokemonName = pokemonName
+                }, cancellationToken);
+
+            return result.Match(Ok, error => StatusCode((int) error.StatusCode, error));
+        }
     }
 }
