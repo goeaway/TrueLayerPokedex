@@ -9,11 +9,12 @@ using TrueLayerPokedex.Domain.Dtos;
 using OneOf;
 using TrueLayerPokedex.Application.Common;
 using TrueLayerPokedex.Domain;
+using TrueLayerPokedex.Domain.Models;
 using TrueLayerPokedex.Domain.Options;
 
 namespace TrueLayerPokedex.Application.Queries.GetTranslatedPokemonInfo
 {
-    public class GetTranslatedPokemonInfoHandler : IRequestHandler<GetTranslatedPokemonInfoQuery, OneOf<PokemonInfoDto, ErrorDto>>
+    public class GetTranslatedPokemonInfoHandler : IRequestHandler<GetTranslatedPokemonInfoQuery, ResponseOrError<PokemonInfoDto>>
     {
         private readonly IPokemonService _pokemonService;
         private readonly ITranslationService _translationService;
@@ -35,7 +36,7 @@ namespace TrueLayerPokedex.Application.Queries.GetTranslatedPokemonInfo
             _cachingOptions = cachingOptions;
         }
 
-        public async Task<OneOf<PokemonInfoDto, ErrorDto>> Handle(GetTranslatedPokemonInfoQuery request, CancellationToken cancellationToken)
+        public async Task<ResponseOrError<PokemonInfoDto>> Handle(GetTranslatedPokemonInfoQuery request, CancellationToken cancellationToken)
         {
             var cacheKey = $"translated:{request.PokemonName}";
             var cachedPokemonInfo = await _distributedCache.GetAsync(cacheKey, cancellationToken);

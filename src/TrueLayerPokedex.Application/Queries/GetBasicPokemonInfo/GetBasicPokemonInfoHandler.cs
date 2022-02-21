@@ -1,20 +1,19 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
-using OneOf;
 using TrueLayerPokedex.Application.Common;
 using TrueLayerPokedex.Domain;
 using TrueLayerPokedex.Domain.Dtos;
+using TrueLayerPokedex.Domain.Models;
 using TrueLayerPokedex.Domain.Options;
 
 namespace TrueLayerPokedex.Application.Queries.GetBasicPokemonInfo
 {
-    public class GetBasicPokemonInfoHandler : IRequestHandler<GetBasicPokemonInfoQuery, OneOf<PokemonInfoDto, ErrorDto>>
+    public class GetBasicPokemonInfoHandler : IRequestHandler<GetBasicPokemonInfoQuery, ResponseOrError<PokemonInfoDto>>
     {
         private readonly IPokemonService _pokemonService;
         private readonly IDistributedCache _distributedCache;
@@ -33,7 +32,7 @@ namespace TrueLayerPokedex.Application.Queries.GetBasicPokemonInfo
             _cachingOptions = cachingOptions;
         }
 
-        public async Task<OneOf<PokemonInfoDto, ErrorDto>> Handle(GetBasicPokemonInfoQuery request, CancellationToken cancellationToken)
+        public async Task<ResponseOrError<PokemonInfoDto>> Handle(GetBasicPokemonInfoQuery request, CancellationToken cancellationToken)
         {
             var cacheKey = $"basic:{request.PokemonName}";
             var cachedPokemonInfo = await _distributedCache.GetAsync(cacheKey, cancellationToken);
