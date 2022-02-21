@@ -1,11 +1,20 @@
-﻿using System.Net;
+﻿using System;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 using TrueLayerPokedex.Application.Common;
+using TrueLayerPokedex.Application.Queries.GetBasicPokemonInfo;
 using TrueLayerPokedex.Application.Queries.GetTranslatedPokemonInfo;
+using TrueLayerPokedex.Domain.Dtos;
 using TrueLayerPokedex.Domain.Models;
+using TrueLayerPokedex.Domain.Options;
 
 namespace TrueLayerPokedex.Application.Tests.Queries
 {
@@ -13,6 +22,11 @@ namespace TrueLayerPokedex.Application.Tests.Queries
     {
         private Mock<IPokemonService> _pokemonService;
         private Mock<ITranslationService> _translationService;
+        private Mock<IDistributedCache> _cache;
+        private TestNowProvider _nowProvider;
+        private CachingOptions _cachingOptionsValue;
+        private Mock<IOptionsSnapshot<CachingOptions>> _cachingOptions;
+        
         private GetTranslatedPokemonInfoHandler _sut;
 
         [SetUp]
@@ -20,7 +34,58 @@ namespace TrueLayerPokedex.Application.Tests.Queries
         {
             _pokemonService = new Mock<IPokemonService>();
             _translationService = new Mock<ITranslationService>();
-            _sut = new GetTranslatedPokemonInfoHandler(_pokemonService.Object, _translationService.Object);
+            
+            _cache = new Mock<IDistributedCache>();
+            _cachingOptionsValue = new CachingOptions();
+            _cachingOptions = new Mock<IOptionsSnapshot<CachingOptions>>();
+            _cachingOptions.Setup(mock => mock.Value)
+                .Returns(_cachingOptionsValue);
+            _nowProvider = new TestNowProvider();
+            
+            _sut = new GetTranslatedPokemonInfoHandler(
+                _pokemonService.Object, 
+                _translationService.Object,
+                _cache.Object, _nowProvider, _cachingOptions.Object);
+        }
+
+        [Test]
+        public async Task Handle_Should_Return_Cached_Version_Of_Data_If_Found_Before_Using_Pokemon_Service()
+        {
+            const string name = "mewtwo";
+            const string description = "description";
+            const string habitat = "habitat";
+            const bool isLegendary = true;
+            
+            var query = new GetTranslatedPokemonInfoQuery
+            {
+                PokemonName = name
+            };
+
+            var cachedData = new PokemonInfoDto
+            {
+                Name = name,
+                Description = description,
+                Habitat = habitat,
+                IsLegendary = isLegendary
+            };
+
+            _cache.Setup(mock => mock.GetAsync($"translated:{name}", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(cachedData)));
+
+            var result = await _sut.Handle(query, default);
+
+            var data = result.AsT0;
+            
+            Assert.AreEqual(name, data.Name);
+            Assert.AreEqual(description, data.Description);
+            Assert.AreEqual(habitat, data.Habitat);
+            Assert.AreEqual(isLegendary, data.IsLegendary);
+            
+            _pokemonService.Verify(
+                mock => mock.GetPokemonDataAsync(
+                    It.IsAny<string>(), 
+                    It.IsAny<CancellationToken>()), 
+                Times.Never);
         }
         
         [Test]
@@ -162,6 +227,77 @@ namespace TrueLayerPokedex.Application.Tests.Queries
             Assert.AreEqual(translatedDescription, data.Description);
             Assert.AreEqual(translatedHabitat, data.Habitat);
             Assert.AreEqual(isLegendary, data.IsLegendary);
+        }
+        
+        [Test]
+        public async Task Handle_Should_Save_PokemonInfoDto_To_Cache_Before_Returning()
+        {
+            var now = new DateTime(2022, 02, 28, 09, 00, 00);
+            _nowProvider.Update(now);
+            _cachingOptionsValue.Ttl = TimeSpan.FromHours(1);
+            
+            const string name = "mewtwo", description = "description", habitat = "habitat";
+            const bool isLegendary = true;
+            
+            const string translatedName = "translated name", translatedDescription = "translated description", translatedHabitat = "translated habitat";
+            
+            var query = new GetTranslatedPokemonInfoQuery
+            {
+                PokemonName = name
+            };
+
+            _pokemonService
+                .Setup(mock => mock.GetPokemonDataAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new PokemonServiceResponse
+                {
+                    Success = true,
+                    StatusCode = HttpStatusCode.OK,
+                    Data = new PokemonInfo
+                    {
+                        Name = name,
+                        IsLegendary = isLegendary,
+                        Habitat = habitat,
+                        Description = description
+                    }
+                });
+            
+            _translationService
+                .Setup(mock => mock.GetTranslationAsync(It.IsAny<PokemonInfo>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new PokemonInfo
+                {
+                    Name = translatedName,
+                    IsLegendary = isLegendary,
+                    Habitat = translatedHabitat,
+                    Description = translatedDescription
+                });
+
+            _cache.Setup(
+                mock => mock
+                    .SetAsync(
+                        It.IsAny<string>(), 
+                        It.IsAny<byte[]>(),
+                        It.IsAny<DistributedCacheEntryOptions>(), 
+                        It.IsAny<CancellationToken>()));
+                
+            await _sut.Handle(query, default);
+
+            var byteData = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new PokemonInfoDto
+            {
+                Name = translatedName,
+                IsLegendary = isLegendary,
+                Habitat = translatedHabitat,
+                Description = translatedDescription
+            })); 
+
+            _cache.Verify(
+                mock => mock.SetAsync(
+                    "translated:mewtwo", 
+                    It.Is<byte[]>(value => value.Length == byteData.Length && value.First() == byteData.First() && value.Last() == byteData.Last()),
+                    It.Is<DistributedCacheEntryOptions>(value =>
+                        value.AbsoluteExpiration == now.Add(_cachingOptionsValue.Ttl)
+                    ), 
+                    It.IsAny<CancellationToken>()), 
+                Times.Once);
         }
     }
 }
