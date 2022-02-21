@@ -47,30 +47,51 @@ namespace TrueLayerPokedex.Infrastructure.Tests.Services
         }
 
         [Test]
-        public async Task GetTranslationAsync_Returns_PokemonInfo_From_Translator_If_One_Is_Found_To_Translate()
+        public async Task GetTranslationAsync_Returns_PokemonInfo_With_Description_From_Translator_If_One_Is_Found_To_Translate()
         {
-            var input = new PokemonInfo();
-            var translated = new PokemonInfo();
+            const string name = "name", description = "description", habitat = "hab";
+            const bool isLegendary = true;
+            
+            var input = new PokemonInfo
+            {
+                Name = name,
+                Description = description,
+                Habitat = habitat,
+                IsLegendary = isLegendary
+            };
+            
+            const string translated = "translated";
 
             var translator = new Mock<ITranslator>();
             
             var sut = new TranslationService(new List<ITranslator> { translator.Object });
 
             translator.Setup(mock => mock.CanTranslate(input)).Returns(true);
-            translator.Setup(mock => mock.GetTranslationAsync(input, It.IsAny<CancellationToken>())).ReturnsAsync(translated);
+            translator.Setup(mock => mock.GetTranslationAsync(description, It.IsAny<CancellationToken>())).ReturnsAsync(translated);
 
             var result = await sut.GetTranslationAsync(input, It.IsAny<CancellationToken>());
             
-            Assert.AreNotSame(input, result);
-            Assert.AreSame(translated, result);
+            Assert.AreEqual(translated, result.Description);
+            Assert.AreEqual(name, result.Name);
+            Assert.AreEqual(habitat, result.Habitat);
+            Assert.AreEqual(isLegendary, result.IsLegendary);
         }
         
         [Test]
-        public async Task GetTranslationAsync_Returns_PokemonInfo_From_First_Translator_If_Multiple_Can_Translate()
+        public async Task GetTranslationAsync_Returns_PokemonInfo_With_Translation_From_First_Translator_If_Multiple_Can_Translate()
         {
-            var input = new PokemonInfo();
-            var translated1 = new PokemonInfo();
-            var translated2 = new PokemonInfo();
+            const string name = "name", description = "description", habitat = "hab";
+            const bool isLegendary = true;
+            
+            var input = new PokemonInfo
+            {
+                Name = name,
+                Description = description,
+                Habitat = habitat,
+                IsLegendary = isLegendary
+            };
+            const string translated1 = "translated 1";
+            const string translated2 = "translated 2";
 
             var translator1 = new Mock<ITranslator>();
             var translator2 = new Mock<ITranslator>();
@@ -78,14 +99,18 @@ namespace TrueLayerPokedex.Infrastructure.Tests.Services
             var sut = new TranslationService(new List<ITranslator> { translator1.Object, translator2.Object });
 
             translator1.Setup(mock => mock.CanTranslate(input)).Returns(true);
-            translator1.Setup(mock => mock.GetTranslationAsync(input, It.IsAny<CancellationToken>())).ReturnsAsync(translated1);
+            translator1.Setup(mock => mock.GetTranslationAsync(input.Description, It.IsAny<CancellationToken>())).ReturnsAsync(translated1);
             
             translator2.Setup(mock => mock.CanTranslate(input)).Returns(true);
-            translator2.Setup(mock => mock.GetTranslationAsync(input, It.IsAny<CancellationToken>())).ReturnsAsync(translated2);
+            translator2.Setup(mock => mock.GetTranslationAsync(input.Description, It.IsAny<CancellationToken>())).ReturnsAsync(translated2);
 
             var result = await sut.GetTranslationAsync(input, default);
             
-            Assert.AreSame(translated1, result);
+            Assert.AreNotSame(input, result);
+            Assert.AreEqual(translated1, result.Description);
+            Assert.AreEqual(name, result.Name);
+            Assert.AreEqual(habitat, result.Habitat);
+            Assert.AreEqual(isLegendary, result.IsLegendary);
         }
     }
 }

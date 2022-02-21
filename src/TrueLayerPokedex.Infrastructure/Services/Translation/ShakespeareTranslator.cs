@@ -19,20 +19,23 @@ namespace TrueLayerPokedex.Infrastructure.Services.Translation
 
         public bool CanTranslate(PokemonInfo pokemonInfo) => true;
 
-        public async Task<PokemonInfo> GetTranslationAsync(PokemonInfo pokemonInfo, CancellationToken cancellationToken)
+        public async Task<string> GetTranslationAsync(string description, CancellationToken cancellationToken)
         {
-            Guard.Against.Null(pokemonInfo, nameof(pokemonInfo));
+            if (description == null)
+            {
+                return null;
+            }
 
             var content = new StringContent(JsonSerializer.Serialize(new TranslationRequestData
             {
-                Text = pokemonInfo.Description
+                Text = description
             }), Encoding.UTF8, "application/json");
 
             var response = await _client.PostAsync("shakespeare.json", content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
-                return pokemonInfo;
+                return description;
             }
             
             try
@@ -41,20 +44,14 @@ namespace TrueLayerPokedex.Infrastructure.Services.Translation
 
                 if (responseContent?.Contents?.Translated == null || responseContent.Contents.Translated == "")
                 {
-                    return pokemonInfo;
+                    return description;
                 }
-                
-                return new PokemonInfo
-                {
-                    Name = pokemonInfo.Name,
-                    Habitat = pokemonInfo.Habitat,
-                    Description = responseContent.Contents.Translated,
-                    IsLegendary = pokemonInfo.IsLegendary
-                };
+
+                return responseContent.Contents.Translated;
             }
             catch (JsonException)
             {
-                return pokemonInfo;
+                return description;
             }
         }
     }

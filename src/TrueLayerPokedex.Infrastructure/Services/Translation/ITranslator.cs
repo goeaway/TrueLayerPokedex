@@ -7,6 +7,6 @@ namespace TrueLayerPokedex.Infrastructure.Services.Translation
     public interface ITranslator
     {
         bool CanTranslate(PokemonInfo pokemonInfo);
-        Task<PokemonInfo> GetTranslationAsync(PokemonInfo pokemonInfo, CancellationToken cancellationToken);
+        Task<string> GetTranslationAsync(string description, CancellationToken cancellationToken);
     }
 }

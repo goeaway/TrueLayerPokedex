@@ -10,21 +10,11 @@ namespace TrueLayerPokedex.Tests.Integration
 {
     public static class Setup
     {
-        public static (HttpClient, TestServer) CreateServer()
-        {
-            return CreateServer(_ => { }, new Dictionary<string, string>());
-        }
-        
         public static (HttpClient, TestServer) CreateServer(Action<IServiceCollection> serviceConfigurer)
         {
             return CreateServer(serviceConfigurer, new Dictionary<string, string>());
         }
         
-        public static (HttpClient, TestServer) CreateServer(IDictionary<string, string> config)
-        {
-            return CreateServer(_ => {}, config);
-        }
-
         public static (HttpClient, TestServer) CreateServer(
             Action<IServiceCollection> serviceConfigurer, 
             IDictionary<string, string> config)

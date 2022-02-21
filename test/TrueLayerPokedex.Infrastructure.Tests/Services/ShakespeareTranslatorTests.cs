@@ -36,9 +36,10 @@ namespace TrueLayerPokedex.Infrastructure.Tests.Services
         }
         
         [Test]
-        public void GetTranslationAsync_Throws_If_PokemonInfo_Null()
+        public async Task GetTranslationAsync_Returns_Null_If_Description_Null()
         {
-            Assert.ThrowsAsync<ArgumentNullException>(() => _sut.GetTranslationAsync(null, default));
+            var result = await _sut.GetTranslationAsync(null, default);
+            Assert.IsNull(result);
         }
 
         [Test]
@@ -46,11 +47,6 @@ namespace TrueLayerPokedex.Infrastructure.Tests.Services
         {
             const string description = "It is a description";
             
-            var info = new PokemonInfo
-            {
-                Description = description
-            };
-
             var request = _mockHttp.When("/shakespeare.json")
                 .With(m =>
                 {
@@ -60,62 +56,42 @@ namespace TrueLayerPokedex.Infrastructure.Tests.Services
                 })
                 .Respond(HttpStatusCode.NotFound);
 
-            await _sut.GetTranslationAsync(info, default);
+            await _sut.GetTranslationAsync(description, default);
 
             Assert.AreEqual(1, _mockHttp.GetMatchCount(request));
         }
         
         [Test]
-        public async Task GetTranslationAsync_Returns_Same_PokemonInfo_As_Input_If_Request_Fails()
+        public async Task GetTranslationAsync_Returns_Same_Description_As_Input_If_Request_Fails()
         {
             const string description = "It is a description";
             
-            var info = new PokemonInfo
-            {
-                Description = description
-            };
-
             _mockHttp.When("/shakespeare.json")
                 .Respond(HttpStatusCode.NotFound);
 
-            var result = await _sut.GetTranslationAsync(info, default);
+            var result = await _sut.GetTranslationAsync(description, default);
 
-            Assert.AreSame(info, result);
+            Assert.AreEqual(description, result);
         }
         
         [Test]
-        public async Task GetTranslationAsync_Returns_Same_PokemonInfo_As_Input_If_Request_Succeeds_But_Content_Could_Not_Be_Deserialised()
+        public async Task GetTranslationAsync_Returns_Same_Description_As_Input_If_Request_Succeeds_But_Content_Could_Not_Be_Deserialised()
         {
             const string description = "It is a description";
             
-            var info = new PokemonInfo
-            {
-                Description = description
-            };
-
             _mockHttp.When("/shakespeare.json")
                 .Respond("application/json", "not json");
 
-            var result = await _sut.GetTranslationAsync(info, default);
+            var result = await _sut.GetTranslationAsync(description, default);
 
-            Assert.AreSame(info, result);
+            Assert.AreEqual(description, result);
         }
         
         [Test]
-        public async Task GetTranslationAsync_Returns_New_PokemonInfo_Using_Translated_Text_If_Request_Succeeds_And_Can_Be_Deserialised()
+        public async Task GetTranslationAsync_Returns_New_Description_Using_Translated_Text_If_Request_Succeeds_And_Can_Be_Deserialised()
         {
-            const string name = "name", habitat = "hab";
-            const bool isLegendary = true;
             const string inputDescription = "It is a description", translatedDescription = "translated description";
             
-            var info = new PokemonInfo
-            {
-                Name = name,
-                Habitat = habitat,
-                IsLegendary = isLegendary,
-                Description = inputDescription
-            };
-
             _mockHttp.When("/shakespeare.json")
                 .Respond("application/json", JsonSerializer.Serialize(new TranslationResponseData
                 {
@@ -131,30 +107,16 @@ namespace TrueLayerPokedex.Infrastructure.Tests.Services
                     }
                 }));
 
-            var result = await _sut.GetTranslationAsync(info, default);
+            var result = await _sut.GetTranslationAsync(inputDescription, default);
 
-            Assert.AreNotSame(info, result);
-            Assert.AreEqual(name, result.Name);
-            Assert.AreEqual(translatedDescription, result.Description);
-            Assert.AreEqual(habitat, result.Habitat);
-            Assert.AreEqual(isLegendary, result.IsLegendary);
+            Assert.AreEqual(translatedDescription, result);
         }
         
         [Test]
-        public async Task GetTranslationAsync_Returns_Input_PokemonInfo_If_Request_Succeeded_And_Could_Be_Deserialised_But_Contents_Was_Null()
+        public async Task GetTranslationAsync_Returns_Input_Description_If_Request_Succeeded_And_Could_Be_Deserialised_But_Contents_Was_Null()
         {
-            const string name = "name", habitat = "hab";
-            const bool isLegendary = true;
             const string inputDescription = "It is a description";
             
-            var info = new PokemonInfo
-            {
-                Name = name,
-                Habitat = habitat,
-                IsLegendary = isLegendary,
-                Description = inputDescription
-            };
-
             _mockHttp.When("/shakespeare.json")
                 .Respond("application/json", JsonSerializer.Serialize(new TranslationResponseData
                 {
@@ -165,26 +127,16 @@ namespace TrueLayerPokedex.Infrastructure.Tests.Services
                     Contents = null
                 }));
 
-            var result = await _sut.GetTranslationAsync(info, default);
+            var result = await _sut.GetTranslationAsync(inputDescription, default);
 
-            Assert.AreSame(info, result);
+            Assert.AreEqual(inputDescription, result);
         }
         
         [Test]
-        public async Task GetTranslationAsync_Returns_Input_PokemonInfo_If_Request_Succeeded_And_Could_Be_Deserialised_Contents_Was_Not_Null_But_Translated_Was_Null()
+        public async Task GetTranslationAsync_Returns_Input_Description_If_Request_Succeeded_And_Could_Be_Deserialised_Contents_Was_Not_Null_But_Translated_Was_Null()
         {
-            const string name = "name", habitat = "hab";
-            const bool isLegendary = true;
             const string inputDescription = "It is a description";
             
-            var info = new PokemonInfo
-            {
-                Name = name,
-                Habitat = habitat,
-                IsLegendary = isLegendary,
-                Description = inputDescription
-            };
-
             _mockHttp.When("/shakespeare.json")
                 .Respond("application/json", JsonSerializer.Serialize(new TranslationResponseData
                 {
@@ -200,26 +152,16 @@ namespace TrueLayerPokedex.Infrastructure.Tests.Services
                     }
                 }));
 
-            var result = await _sut.GetTranslationAsync(info, default);
+            var result = await _sut.GetTranslationAsync(inputDescription, default);
 
-            Assert.AreSame(info, result);
+            Assert.AreEqual(inputDescription, result);
         }
         
         [Test]
-        public async Task GetTranslationAsync_Returns_Input_PokemonInfo_If_Request_Succeeded_And_Could_Be_Deserialised_Contents_Was_Not_Null_But_Translated_Was_Empty()
+        public async Task GetTranslationAsync_Returns_Input_Description_If_Request_Succeeded_And_Could_Be_Deserialised_Contents_Was_Not_Null_But_Translated_Was_Empty()
         {
-            const string name = "name", habitat = "hab";
-            const bool isLegendary = true;
             const string inputDescription = "It is a description";
             
-            var info = new PokemonInfo
-            {
-                Name = name,
-                Habitat = habitat,
-                IsLegendary = isLegendary,
-                Description = inputDescription
-            };
-
             _mockHttp.When("/shakespeare.json")
                 .Respond("application/json", JsonSerializer.Serialize(new TranslationResponseData
                 {
@@ -235,9 +177,9 @@ namespace TrueLayerPokedex.Infrastructure.Tests.Services
                     }
                 }));
 
-            var result = await _sut.GetTranslationAsync(info, default);
+            var result = await _sut.GetTranslationAsync(inputDescription, default);
 
-            Assert.AreSame(info, result);
+            Assert.AreEqual(inputDescription, result);
         }
     }
 }

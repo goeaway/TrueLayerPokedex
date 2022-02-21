@@ -7,11 +7,6 @@ RUN dotnet publish ./src/TrueLayerPokedex/TrueLayerPokedex.csproj -c Debug -o ou
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime-env
 
-# Below allows for debugging in Rider IDE
-RUN apt-get update
-RUN apt-get -y --no-install-recommends install openssh-server && mkdir -p /run/sshd && echo root:test | chpasswd
-RUN printf "Port 22\nPermitRootLogin yes" >> /etc/ssh/sshd_config
-
 WORKDIR /app
 COPY --from=build-env /app/out .
-ENTRYPOINT ["/bin/sh", "-c", "service ssh start && dotnet TrueLayerPokedex.dll"]
+ENTRYPOINT ["dotnet", "TrueLayerPokedex.dll"]

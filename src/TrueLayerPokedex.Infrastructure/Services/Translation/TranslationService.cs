@@ -28,7 +28,18 @@ namespace TrueLayerPokedex.Infrastructure.Services.Translation
                 return pokemonInfo;
             }
 
-            return await translator.GetTranslationAsync(pokemonInfo, cancellationToken);
+            var translatedDescription = 
+                await translator.GetTranslationAsync(
+                    pokemonInfo.Description, 
+                    cancellationToken);
+
+            return new PokemonInfo
+            {
+                Name = pokemonInfo.Name,
+                Habitat = pokemonInfo.Habitat,
+                IsLegendary = pokemonInfo.IsLegendary,
+                Description = translatedDescription
+            };
         }
     }
 }
