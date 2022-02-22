@@ -45,3 +45,42 @@ dotnet run --project src/TrueLayerPokedex/TrueLayerPokedex.csproj
 * Open the cloned project in your preferred IDE
 * Ensure your IDE supports dotnet 6
 * Run the project through the IDE, the entry point for the app is `TrueLayerPokedex.csproj`
+
+
+## How to Use
+
+Two endpoints are available:
+
+`/pokemon/<pokemonName>` - with which you can get standard information on a pokemon
+
+`/pokemon/translated/<pokemonName>` - with which you can get the translated information on a pokemon
+
+Make an HTTP GET request to either of these endpoints through your preferred method, e.g. a curl request like the below:
+
+`curl http://localhost:9000/pokemon/mewtwo`
+
+Returns the below response
+
+```
+{
+	"name":"mewtwo",
+	"description":"It was created by a scientist after years of horrific gene splicing and DNA engineering experiments.",
+	"habitat":"rare",
+	"isLegendary":true
+}
+```
+
+A request to the translated endpoint like the below:
+
+`curl http://localhost:9000/pokemon/translated/mewtwo`
+
+Returns the below response
+
+```
+{
+    "name": "mewtwo",
+    "description": "Created by a scientist after years of horrific gene splicing and dna engineering experiments,  it was.",
+    "habitat": "rare",
+    "isLegendary": true
+}
+```
