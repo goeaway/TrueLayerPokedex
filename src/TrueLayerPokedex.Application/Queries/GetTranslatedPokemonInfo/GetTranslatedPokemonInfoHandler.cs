@@ -17,20 +17,20 @@ namespace TrueLayerPokedex.Application.Queries.GetTranslatedPokemonInfo
     {
         private readonly IPokemonService _pokemonService;
         private readonly ITranslationService _translationService;
-        private readonly IDistributedCache _distributedCache;
+        private readonly ICacheWrapper<PokemonInfoDto> _cacheWrapper;
         private readonly IUtcNowProvider _nowProvider;
         private readonly IOptionsSnapshot<CachingOptions> _cachingOptions;
 
         public GetTranslatedPokemonInfoHandler(
             IPokemonService pokemonService, 
             ITranslationService translationService, 
-            IDistributedCache distributedCache, 
+            ICacheWrapper<PokemonInfoDto> cacheWrapper, 
             IUtcNowProvider nowProvider, 
             IOptionsSnapshot<CachingOptions> cachingOptions)
         {
             _pokemonService = pokemonService;
             _translationService = translationService;
-            _distributedCache = distributedCache;
+            _cacheWrapper = cacheWrapper;
             _nowProvider = nowProvider;
             _cachingOptions = cachingOptions;
         }
@@ -38,10 +38,10 @@ namespace TrueLayerPokedex.Application.Queries.GetTranslatedPokemonInfo
         public async Task<OneOf<PokemonInfoDto, ErrorDto>> Handle(GetTranslatedPokemonInfoQuery request, CancellationToken cancellationToken)
         {
             var cacheKey = $"translated:{request.PokemonName}";
-            var cachedPokemonInfo = await _distributedCache.GetAsync(cacheKey, cancellationToken);
-            if (cachedPokemonInfo != null && cachedPokemonInfo.Length > 0)
+            var cachedPokemonInfo = await _cacheWrapper.GetAsync(cacheKey, cancellationToken);
+            if (cachedPokemonInfo != null)
             {
-                return JsonSerializer.Deserialize<PokemonInfoDto>(cachedPokemonInfo);
+                return cachedPokemonInfo;
             }
             
             var pokemonResult = await _pokemonService.GetPokemonDataAsync(request.PokemonName, cancellationToken);
@@ -65,13 +65,10 @@ namespace TrueLayerPokedex.Application.Queries.GetTranslatedPokemonInfo
                 IsLegendary = translatedResult.IsLegendary
             };
             
-            await _distributedCache.SetAsync(
+            await _cacheWrapper.SetAsync(
                 cacheKey, 
-                Encoding.UTF8.GetBytes(JsonSerializer.Serialize(result)),
-                new DistributedCacheEntryOptions
-                {   
-                    AbsoluteExpiration = _nowProvider.Now.Add(_cachingOptions.Value.Ttl)
-                },
+                result,
+                _nowProvider.Now.Add(_cachingOptions.Value.Ttl),
                 cancellationToken);
 
             return result;

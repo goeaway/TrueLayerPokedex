@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TrueLayerPokedex.Application.Common;
+using TrueLayerPokedex.Infrastructure.Services.Caching;
 using TrueLayerPokedex.Infrastructure.Services.Pokemon;
 using TrueLayerPokedex.Infrastructure.Services.Translation;
 
@@ -14,7 +15,8 @@ namespace TrueLayerPokedex.Infrastructure
         {
             return services
                 .AddPokemonService(configuration)
-                .AddTranslation(configuration);
+                .AddTranslation(configuration)
+                .AddCacheWrapper();
         }
 
         private static IServiceCollection AddPokemonService(this IServiceCollection services, IConfiguration configuration)
@@ -40,6 +42,13 @@ namespace TrueLayerPokedex.Infrastructure
             });
             
             services.AddTransient<ITranslationService, TranslationService>();
+
+            return services;
+        }
+
+        private static IServiceCollection AddCacheWrapper(this IServiceCollection services)
+        {
+            services.AddTransient(typeof(ICacheWrapper<>), typeof(CacheWrapper<>));
 
             return services;
         }

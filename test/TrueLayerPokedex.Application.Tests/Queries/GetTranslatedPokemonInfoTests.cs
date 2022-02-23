@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 using TrueLayerPokedex.Application.Common;
-using TrueLayerPokedex.Application.Queries.GetBasicPokemonInfo;
 using TrueLayerPokedex.Application.Queries.GetTranslatedPokemonInfo;
 using TrueLayerPokedex.Domain.Dtos;
 using TrueLayerPokedex.Domain.Models;
@@ -22,7 +17,7 @@ namespace TrueLayerPokedex.Application.Tests.Queries
     {
         private Mock<IPokemonService> _pokemonService;
         private Mock<ITranslationService> _translationService;
-        private Mock<IDistributedCache> _cache;
+        private Mock<ICacheWrapper<PokemonInfoDto>> _cache;
         private TestNowProvider _nowProvider;
         private CachingOptions _cachingOptionsValue;
         private Mock<IOptionsSnapshot<CachingOptions>> _cachingOptions;
@@ -35,7 +30,7 @@ namespace TrueLayerPokedex.Application.Tests.Queries
             _pokemonService = new Mock<IPokemonService>();
             _translationService = new Mock<ITranslationService>();
             
-            _cache = new Mock<IDistributedCache>();
+            _cache = new Mock<ICacheWrapper<PokemonInfoDto>>();
             _cachingOptionsValue = new CachingOptions();
             _cachingOptions = new Mock<IOptionsSnapshot<CachingOptions>>();
             _cachingOptions.Setup(mock => mock.Value)
@@ -70,7 +65,7 @@ namespace TrueLayerPokedex.Application.Tests.Queries
             };
 
             _cache.Setup(mock => mock.GetAsync($"translated:{name}", It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(cachedData)));
+                .ReturnsAsync(cachedData);
 
             var result = await _sut.Handle(query, default);
 
@@ -275,27 +270,17 @@ namespace TrueLayerPokedex.Application.Tests.Queries
                 mock => mock
                     .SetAsync(
                         It.IsAny<string>(), 
-                        It.IsAny<byte[]>(),
-                        It.IsAny<DistributedCacheEntryOptions>(), 
+                        It.IsAny<PokemonInfoDto>(),
+                        It.IsAny<DateTime>(), 
                         It.IsAny<CancellationToken>()));
                 
             await _sut.Handle(query, default);
 
-            var byteData = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new PokemonInfoDto
-            {
-                Name = translatedName,
-                IsLegendary = isLegendary,
-                Habitat = translatedHabitat,
-                Description = translatedDescription
-            })); 
-
             _cache.Verify(
                 mock => mock.SetAsync(
                     "translated:mewtwo", 
-                    It.Is<byte[]>(value => value.Length == byteData.Length && value.First() == byteData.First() && value.Last() == byteData.Last()),
-                    It.Is<DistributedCacheEntryOptions>(value =>
-                        value.AbsoluteExpiration == now.Add(_cachingOptionsValue.Ttl)
-                    ), 
+                    It.Is<PokemonInfoDto>(value => value.Name == translatedName && value.Description == translatedDescription && value.Habitat == translatedHabitat && value.IsLegendary == isLegendary),
+                    now.Add(_cachingOptionsValue.Ttl),
                     It.IsAny<CancellationToken>()), 
                 Times.Once);
         }

@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
@@ -20,7 +16,7 @@ namespace TrueLayerPokedex.Application.Tests.Queries
     public class GetBasicPokemonInfoTests
     {
         private GetBasicPokemonInfoHandler _sut;
-        private Mock<IDistributedCache> _cache;
+        private Mock<ICacheWrapper<PokemonInfoDto>> _cache;
         private Mock<IPokemonService> _pokemonService;
         private TestNowProvider _nowProvider;
         private CachingOptions _cachingOptionsValue;
@@ -30,7 +26,7 @@ namespace TrueLayerPokedex.Application.Tests.Queries
         public void Init()
         {
             _pokemonService = new Mock<IPokemonService>();
-            _cache = new Mock<IDistributedCache>();
+            _cache = new Mock<ICacheWrapper<PokemonInfoDto>>();
             _cachingOptionsValue = new CachingOptions();
             _cachingOptions = new Mock<IOptionsSnapshot<CachingOptions>>();
             _cachingOptions.Setup(mock => mock.Value)
@@ -67,7 +63,7 @@ namespace TrueLayerPokedex.Application.Tests.Queries
             };
 
             _cache.Setup(mock => mock.GetAsync($"basic:{name}", It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(cachedData)));
+                .ReturnsAsync(cachedData);
 
             var result = await _sut.Handle(query, default);
 
@@ -192,46 +188,38 @@ namespace TrueLayerPokedex.Application.Tests.Queries
                 PokemonName = name
             };
 
+            var data = new PokemonInfo
+            {
+                Name = name,
+                IsLegendary = isLegendary,
+                Habitat = habitat,
+                Description = description
+            }; 
+
             _pokemonService
                 .Setup(mock => mock.GetPokemonDataAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new PokemonServiceResponse
                 {
                     Success = true,
                     StatusCode = HttpStatusCode.OK,
-                    Data = new PokemonInfo
-                    {
-                        Name = name,
-                        IsLegendary = isLegendary,
-                        Habitat = habitat,
-                        Description = description
-                    }
+                    Data = data 
                 });
 
             _cache.Setup(
                 mock => mock
                     .SetAsync(
                         It.IsAny<string>(), 
-                        It.IsAny<byte[]>(),
-                        It.IsAny<DistributedCacheEntryOptions>(), 
+                        It.IsAny<PokemonInfoDto>(),
+                        It.IsAny<DateTime>(), 
                         It.IsAny<CancellationToken>()));
                 
             await _sut.Handle(query, default);
 
-            var byteData = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new PokemonInfoDto
-            {
-                Name = name,
-                IsLegendary = isLegendary,
-                Habitat = habitat,
-                Description = description
-            })); 
-
             _cache.Verify(
                 mock => mock.SetAsync(
                     "basic:mewtwo", 
-                    It.Is<byte[]>(value => value.Length == byteData.Length && value.First() == byteData.First() && value.Last() == byteData.Last()),
-                    It.Is<DistributedCacheEntryOptions>(value =>
-                        value.AbsoluteExpiration == now.Add(_cachingOptionsValue.Ttl)
-                    ), 
+                    It.Is<PokemonInfoDto>(value => value.Name == name && value.Description == description && value.Habitat == habitat && value.IsLegendary == isLegendary),
+                    now.Add(_cachingOptionsValue.Ttl),
                     It.IsAny<CancellationToken>()), 
                 Times.Once);
         }

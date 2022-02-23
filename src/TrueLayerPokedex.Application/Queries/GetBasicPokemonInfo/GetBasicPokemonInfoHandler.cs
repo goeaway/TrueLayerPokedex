@@ -1,10 +1,6 @@
-﻿using System;
-using System.Text;
-using System.Text.Json;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using OneOf;
 using TrueLayerPokedex.Application.Common;
@@ -17,18 +13,18 @@ namespace TrueLayerPokedex.Application.Queries.GetBasicPokemonInfo
     public class GetBasicPokemonInfoHandler : IRequestHandler<GetBasicPokemonInfoQuery, OneOf<PokemonInfoDto, ErrorDto>>
     {
         private readonly IPokemonService _pokemonService;
-        private readonly IDistributedCache _distributedCache;
+        private readonly ICacheWrapper<PokemonInfoDto> _cacheWrapper;
         private readonly IUtcNowProvider _nowProvider;
         private readonly IOptionsSnapshot<CachingOptions> _cachingOptions;
 
         public GetBasicPokemonInfoHandler(
             IPokemonService pokemonService, 
-            IDistributedCache distributedCache, 
+            ICacheWrapper<PokemonInfoDto> cacheWrapper, 
             IUtcNowProvider nowProvider, 
             IOptionsSnapshot<CachingOptions> cachingOptions)
         {
             _pokemonService = pokemonService;
-            _distributedCache = distributedCache;
+            _cacheWrapper = cacheWrapper;
             _nowProvider = nowProvider;
             _cachingOptions = cachingOptions;
         }
@@ -36,10 +32,10 @@ namespace TrueLayerPokedex.Application.Queries.GetBasicPokemonInfo
         public async Task<OneOf<PokemonInfoDto, ErrorDto>> Handle(GetBasicPokemonInfoQuery request, CancellationToken cancellationToken)
         {
             var cacheKey = $"basic:{request.PokemonName}";
-            var cachedPokemonInfo = await _distributedCache.GetAsync(cacheKey, cancellationToken);
-            if (cachedPokemonInfo != null && cachedPokemonInfo.Length > 0)
+            var cachedPokemonInfo = await _cacheWrapper.GetAsync(cacheKey, cancellationToken);
+            if (cachedPokemonInfo != null)
             {
-                return JsonSerializer.Deserialize<PokemonInfoDto>(cachedPokemonInfo);
+                return cachedPokemonInfo;
             }
             
             var pokemonResult = await _pokemonService.GetPokemonDataAsync(request.PokemonName, cancellationToken);
@@ -61,13 +57,10 @@ namespace TrueLayerPokedex.Application.Queries.GetBasicPokemonInfo
                 IsLegendary = pokemonResult.Data.IsLegendary
             };
 
-            await _distributedCache.SetAsync(
+            await _cacheWrapper.SetAsync(
                 cacheKey, 
-                Encoding.UTF8.GetBytes(JsonSerializer.Serialize(result)),
-                new DistributedCacheEntryOptions
-                {   
-                    AbsoluteExpiration = _nowProvider.Now.Add(_cachingOptions.Value.Ttl)
-                },
+                result,
+                _nowProvider.Now.Add(_cachingOptions.Value.Ttl),
                 cancellationToken);
 
             return result;
