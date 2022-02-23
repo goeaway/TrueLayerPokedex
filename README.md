@@ -114,11 +114,15 @@ This project contain models, dtos, options, and "low" level interfaces and logic
 
 ### Application
 
-This project contains application logic, which is split into "vertical slices" using the [MediatR](https://github.com/jbogard/MediatR) nuget package. It is dependent on the `Domain`, but has no dependencies on any other project. This section defines interfaces that are implemented by the `Infrastructure` project. For example, the `IPokemonService`, which actually gets the pokemon data, is defined in this section, but is implemented in the `Infrastructure` section.
+This project contains application logic, which is split into "vertical slices" using the [MediatR](https://github.com/jbogard/MediatR) nuget package. It is dependent on the `Domain`, but has no dependencies on any other project. This section defines interfaces that are implemented by the `Infrastructure` project. For example, the `IPokemonService`, which actually gets the pokemon data, is defined in this section, but is implemented in the `Infrastructure` project. 
+
+Find the handlers for each endpoint in this project, in the `Queries` directory.
 
 ### Infrastructure
 
-This project contains classes for accessing external resources such as file systems, web services, smtp, and so on. These classes should be based on interfaces defined within the application section. The `PokemonService` and `TranslationService` and `Translators` are implemented here. Each `Translator` provides functionality to change a Pokemon's description in a certain way. The `TranslationService` is injected with a collection of them and when called upon to get a translated version, will go through them until it finds one that can translate the given pokemon info. It will then use the chosen `Translator`. The order of the translators matters, and it is preserved from when they are registered in the DI container. This collection injection allows for the translation system to be extended without having to modify the existing code. You could just add a new `ITranslator`, which defines whether it can translate the info for a pokemon as well as how to actually translate it, then add it to the DI container.
+This project contains classes for accessing external resources such as file systems, web services, smtp, and so on. These classes should be based on interfaces defined within the application section. The `PokemonService` and `TranslationService` and `Translators` are implemented here. Each `Translator` provides functionality to change a Pokemon's description in a certain way. 
+
+The `TranslationService` is injected with a collection of them and when called upon to get a translated version, will go through them until it finds one that can translate the given pokemon info. It will then use the chosen `Translator`. The order of the translators matters, and it is preserved from when they are registered in the DI container. This collection injection allows for the translation system to be extended without having to modify the existing code. You could just add a new `ITranslator`, which defines whether it can translate the info for a pokemon as well as how to actually translate it, then add it to the DI container.
 
 ### Presentation
 
