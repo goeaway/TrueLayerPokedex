@@ -21,7 +21,7 @@ namespace TrueLayerPokedex.Tests.Integration
         {
             var server = new TestServer(new WebHostBuilder()
                 .UseStartup<Startup>()
-                .ConfigureAppConfiguration((context, cfg) =>
+                .ConfigureAppConfiguration((_, cfg) =>
                 {
                     cfg.AddInMemoryCollection(config ?? new Dictionary<string, string>());
                 })

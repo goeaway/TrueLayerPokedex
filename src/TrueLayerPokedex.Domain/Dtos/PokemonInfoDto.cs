@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace TrueLayerPokedex.Domain.Dtos
+﻿namespace TrueLayerPokedex.Domain.Dtos
 {
     public class PokemonInfoDto
     {

@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using TrueLayerPokedex.Domain.Dtos;
 using TrueLayerPokedex.Domain.Models;
 
 namespace TrueLayerPokedex.Application.Common

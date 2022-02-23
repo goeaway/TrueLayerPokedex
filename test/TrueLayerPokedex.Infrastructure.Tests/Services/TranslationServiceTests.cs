@@ -12,7 +12,7 @@ namespace TrueLayerPokedex.Infrastructure.Tests.Services
     public class TranslationServiceTests
     {
         [Test]
-        public async Task GetTranslationAsync_Throws_If_PokemonInfo_Is_Null()
+        public void GetTranslationAsync_Throws_If_PokemonInfo_Is_Null()
         {
             var sut = new TranslationService(new List<ITranslator>());
             Assert.ThrowsAsync<ArgumentNullException>(() => sut.GetTranslationAsync(null, default));

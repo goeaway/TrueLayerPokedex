@@ -16,7 +16,7 @@ namespace TrueLayerPokedex.Tests.Integration.Controller
         [Test]
         public async Task Basic_Returns_404_If_PokemonName_Not_Provided()
         {
-            var (client, _) = Setup.CreateServer(services => {});
+            var (client, _) = Setup.CreateServer(_ => {});
 
             var result = await client.GetAsync("/pokemon/");
             

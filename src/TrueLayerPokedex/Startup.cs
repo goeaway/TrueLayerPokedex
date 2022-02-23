@@ -9,6 +9,7 @@ using TrueLayerPokedex.Application.Queries.GetBasicPokemonInfo;
 using TrueLayerPokedex.Domain;
 using TrueLayerPokedex.Domain.Options;
 using TrueLayerPokedex.Infrastructure;
+// ReSharper disable AssignNullToNotNullAttribute
 
 namespace TrueLayerPokedex
 {

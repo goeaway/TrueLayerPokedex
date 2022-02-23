@@ -52,7 +52,7 @@ namespace TrueLayerPokedex.Infrastructure.Tests.Services
                 {
                     var data = JsonSerializer.Deserialize<TranslationRequestData>(m.Content.ReadAsStringAsync()
                         .GetAwaiter().GetResult());    
-                    return data.Text == description;
+                    return data?.Text == description;
                 })
                 .Respond(HttpStatusCode.NotFound);
 
