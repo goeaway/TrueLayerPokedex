@@ -30,6 +30,8 @@ namespace TrueLayerPokedex
                 .AddControllers();
 
             services.AddMediatR(Assembly.GetAssembly(typeof(GetBasicPokemonInfoQuery)));
+            
+            // services from the infrastructure project are added here
             services.AddInfrastructure(Configuration);
             services.AddScoped<IUtcNowProvider, UtcNowProvider>();
 

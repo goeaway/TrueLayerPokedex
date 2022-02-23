@@ -9,6 +9,9 @@ using TrueLayerPokedex.Application.Common;
 
 namespace TrueLayerPokedex.Infrastructure.Services.Caching
 {
+    // abstracts away the serialisation and deserialisation of the given type
+    // we also cannot mock extension methods easily (which don't need to use the byte[] versions of methods),
+    // which is why we don't use the DistributedCache directly in handlers
     public class CacheWrapper<T> : ICacheWrapper<T> where T : class
     {
         private readonly IDistributedCache _distributedCache;

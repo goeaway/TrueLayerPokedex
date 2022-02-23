@@ -31,6 +31,10 @@ namespace TrueLayerPokedex.Infrastructure
 
         private static IServiceCollection AddTranslation(this IServiceCollection services, IConfiguration configuration)
         {
+            // The order of this registration is important.
+            // If the shakespeare translator was added first, the yoda translator would never be used.
+            // Adding the translators as HttpClients allows them to each get their own HttpClient injected.
+            // Each get their own instance, but the underlying HttpMessageHandler is shared between them all.
             services.AddHttpClient<ITranslator, YodaTranslator>(client =>
             {
                 client.BaseAddress = new Uri(configuration["Translations:BaseUrl"]);
