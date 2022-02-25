@@ -15,8 +15,7 @@ namespace TrueLayerPokedex.Infrastructure
         {
             return services
                 .AddPokemonService(configuration)
-                .AddTranslation(configuration)
-                .AddCacheWrapper();
+                .AddTranslation(configuration);
         }
 
         private static IServiceCollection AddPokemonService(this IServiceCollection services, IConfiguration configuration)
@@ -25,6 +24,9 @@ namespace TrueLayerPokedex.Infrastructure
             {
                 client.BaseAddress = new Uri(configuration["PokemonApi:BaseUrl"]);
             });
+
+            // decoration allows us to "wrap" the normal pokemon service ^ with more functionality, caching
+            services.Decorate<IPokemonService, CachedPokemonService>();
 
             return services;
         }
@@ -47,12 +49,8 @@ namespace TrueLayerPokedex.Infrastructure
             
             services.AddTransient<ITranslationService, TranslationService>();
 
-            return services;
-        }
-
-        private static IServiceCollection AddCacheWrapper(this IServiceCollection services)
-        {
-            services.AddTransient(typeof(ICacheWrapper<>), typeof(CacheWrapper<>));
+            // decoration allows us to "wrap" the normal translation service ^ with more functionality, caching
+            services.Decorate<ITranslationService, CachedTranslationService>();
 
             return services;
         }
