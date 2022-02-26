@@ -164,11 +164,5 @@ When implementing a feature like this, I like to start with the handler. Any dep
 
 I then did the same for the Translation endpoint and made sure to reuse common code (such as the `IPokemonService`) between both endpoints.
 
-Once I was happy with both endpoints, I decided to implement the caching. This took a few different shapes before I was happy with the implementation. I started by using the `IDistributedCache` in both the endpoint handlers, but didn't like this because there was a fair bit of duplicate code between them. Also, due to the mocking library I was using, I couldn't use the more friendly extension methods on the `IDistributedCache` and had to opt for serialising the data, then converting it to a `byte[]`.
-
-I then attempted to use a MediatR behaviour implementation, which would allow me hook into the request pipeline that MediatR creates. However, this proved difficult as I had to use generic versions of the requests and responses and so could not easily serialise or deserialise the data.
-
-The 3rd version simply wrapped the awkward `IDistributedCache` API in another service that I created, but this still left the handlers having to make use of it.
-
-I finally settled on a version that made use of the [Scrutor](https://github.com/khellang/Scrutor) library, which allowed me to easily utilise the decorator pattern. I created implementations of the `IPokemonService` and `ITranslationService` which both check the `IDistributedCache` and return what is there (if there is anything), before trying the actual implementations respectively. I liked this because it meant I could remove all caching code from the handlers, and rely on the DI container to inject the cache version of each service instead.
+Once I was happy with both endpoints, I decided to implement the caching. This took a few different shapes before I was happy with the implementation. I started by using the `IDistributedCache` in both the endpoint handlers, but didn't like this because there was a fair bit of duplicate code between them. I experimented with a few other ways, such as trying a MediatR pipeline behaviour, and then trying to abstract the `IDistributedCache` away from the handlers. I finally settled on a version that made use of the [Scrutor](https://github.com/khellang/Scrutor) library, which allowed me to easily utilise the decorator pattern and basically remove all caching code from the handlers, and rely instead upon the DI container to serve the correct classes when needed.
 
