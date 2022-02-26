@@ -46,7 +46,7 @@ namespace TrueLayerPokedex.Infrastructure.Services.Pokemon
                     Data = new PokemonInfo
                     {
                         Name = responseContent.Name,
-                        IsLegendary = responseContent.IsLegendary,
+                        IsLegendary = responseContent.IsLegendary.GetValueOrDefault(),
                         Habitat = responseContent.Habitat?.Name,
                         Description = ReplaceControlCharacters(responseContent.FlavorTextEntries?.FirstOrDefault(fte => fte.Language?.Name == "en")?.FlavorText)
                     }

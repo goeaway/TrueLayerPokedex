@@ -157,6 +157,36 @@ namespace TrueLayerPokedex.Infrastructure.Tests.Services
             Assert.IsNull(result.Data.Habitat);
         }
         
+        
+        [Test]
+        public async Task GetPokemonDataAsync_Returns_IsLegendary_As_False_If_IsLegendary_Is_Null_In_Data()
+        {
+            const string name = "mewtwo", desc = "desc", hab = "hab";
+
+            _mockHttp.When("/pokemon-species/*")
+                .Respond("application/json", JsonSerializer.Serialize(new PokemonData
+                    {
+                        Habitat = new PokemonData.HabitatData { Name = hab },
+                        IsLegendary = null,
+                        Name = name,
+                        FlavorTextEntries = new List<PokemonData.FlavorTextEntry>
+                        {
+                            new ()
+                            {
+                                Language = new PokemonData.Language { Name = "en" },
+                                FlavorText = desc
+                            }
+                        }
+                    }
+                ));
+            
+            var result = await _sut.GetPokemonDataAsync(name, default);
+            
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+            Assert.IsFalse(result.Data.IsLegendary);
+        }
+        
         [Test]
         public async Task GetPokemonDataAsync_Returns_Description_As_Null_If_Flavor_Text_Entries_Null()
         {

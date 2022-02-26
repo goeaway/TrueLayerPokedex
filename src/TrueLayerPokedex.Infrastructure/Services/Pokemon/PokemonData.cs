@@ -15,7 +15,7 @@ namespace TrueLayerPokedex.Infrastructure.Services.Pokemon
         public HabitatData Habitat { get; set; }
         
         [JsonPropertyName("is_legendary")]
-        public bool IsLegendary { get; set; }
+        public bool? IsLegendary { get; set; }
         
         public class Language
         {
