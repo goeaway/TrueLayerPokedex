@@ -12,6 +12,7 @@ Built with .Net 6
 * How to use
 * Changes for a production version
 * Project structure overview
+* My approach
 
 ## How to run
 * Clone the repo to your computer
@@ -115,7 +116,7 @@ In production I'd add a logging sink that could log out to a DB or something lik
 
 #### Rate Limiting
 
-In production I'd add some kind of rate limiting functionality, public APIs such as this can be easily abused if they don't restrict usage. For the purposes of this challenge I didn't think it was necessary but it would be extremely important in a real scenario. I could do this by using [this nuget package](https://github.com/stefanprodan/AspNetCoreRateLimit) which adds a middleware to the request pipeline which can reject requests early from IPs if they violate the rate limit. 
+In production I'd add some kind of rate limiting functionality, public APIs such as this can be easily abused if they don't restrict usage. For the purposes of this challenge I didn't think it was necessary but it would be valuable in a real scenario. I could do this by using [this nuget package](https://github.com/stefanprodan/AspNetCoreRateLimit) which adds a middleware to the request pipeline which can reject requests early from IPs if they violate the rate limit. 
 
 #### Common low level service between ITranslators
 
@@ -123,7 +124,7 @@ The translation functionality is split across a couple of services. The `ITransl
 
 #### Handle certain errors from PokeApi differently
 
-When the project gets data from the PokeApi, it is possible this might fail somehow, the most common issue might be that the pokemon name was not recognised. In this scenario the PokeApi returns a 404. When the project sees this error it will return a response of the same status code to its caller. I think this could be improved slightly. Imagine a scenario where we hit some rate limit in the PokeApi, it would probably return a 429 response, but when the caller of our API sees this response they might think they've violated our rate limit, when in reality the API has violated the PokeApi's one. This might be confusing and I think could be improved by simply handling the response from the PokeApi differently for certain responses from it. I didn't do this in this project because I didn't want to have to handle multiple different cases and worry that I had missed out an important one, so i err'd on the side of simplicity and just returned the PokeApi's response directly. 
+When the project gets data from the PokeApi, it is possible this might fail somehow, the most common issue might be that the pokemon name was not recognised. In this scenario the PokeApi returns a 404. When the project sees this error it will return a response of the same status code to its caller. I think this could be improved slightly. Imagine a scenario where we hit some rate limit in the PokeApi, it would probably return a 429 response, but when the caller of our API sees this response they might think they've violated our rate limit, when in reality the API has violated the PokeApi's one. This might be confusing and I think could be improved by handling the response from the PokeApi differently for certain responses. I didn't do this in this project because I didn't want to have to handle multiple different cases and worry that I had missed out an important one, so i err'd on the side of simplicity and just returned the PokeApi's response directly. 
 
 ## Project structure overview
 
@@ -148,3 +149,26 @@ The `TranslationService` is injected with a collection of them and when called u
 ### Presentation
 
 In the context of this project, the presentation section is a web API, but this can take many forms (such as front end website or mobile app views). This section depends on both the `Application` and `Infrastructure` projects, however, the dependency on `Infrastructure` is only to support dependency injection. This project exposes the endpoints through the `PokemonController`, which I purposefully keep very thin, only passing on the request to `MediatR` to be handled.
+
+## My Approach
+
+The first thing I did with this challenge was read the specification through fully, and write down my thoughts on any bits that stood out to me. The translation logic would obviously be a big part of this application and so I set aside some time to think about how best to approach that. I also noticed the bonus points section, and so made sure to preserve my git history from the start, and planned to use Docker.
+
+Before writing any code though, I spent some time interacting with each of the public APIs manually in Postman. I made a few requests to the PokeApi to see what the responses looked like and then did the same for each of the translations. I noticed from the funtranslations docs that they had a pretty low rate limit allowance, so I decided it might be a good idea to implement some caching in the application to allow for repeated requests to avoid using up that allowance.
+
+I then thought about the translations implementation itself, I wanted to ensure that it stuck to SOLID principles as best it could, and so felt a simple set of if statements or a switch statement wouldn't cut it. If, once I was finished with this challenge, I was asked to add another translation I would have to go in and modify those if statements, which violates the O of SOLID. To avoid this, I decided it best to create a set of `ITranslator` implementations, each of which could tell if they can translate a given pokemon and then apply a translation to the description. This would allow me to extend the functionality by adding new implementors, which would not effect existing ones. I would then bring them together using an `ITranslationService` which could be injected with all the `ITranslator` implementations and abstract them away from the caller.
+
+After I'd decided this, I got started and created a dotnet Web API application. I implemented the basic endpoint from end to end first, using a TDD style. I used MediatR to implement a "vertical slice" architecture and so started with the handler for this flow. 
+
+When implementing a feature like this, I like to start with the handler. Any dependencies I will need just get created as an interface for now, and while building the handler I will just mock those dependencies out in tests. I like this approach because it allows me to think first about how I want to use a dependency and how its API should work. I then drill down into them to create them properly (and drilling down further if they have their own dependencies).
+
+I then did the same for the Translation endpoint and made sure to reuse common code (such as the `IPokemonService`) between both the endpoints.
+
+Once I was happy with both endpoints, I decided now would be the time to implement the caching. This took on a few different shapes before I settled on an implementation I was happy with. I started by using the `IDistributedCache` in both the endpoint handlers but didn't like this because there was a fair bit of duplicate code between them. Also, due to the mocking library I was using, I couldn't use the more friendly extension methods on the `IDistributedCache` and had to opt for serialising the data, then converting it to a `byte[]`.
+
+I then attempted to use a MediatR behaviour implementation, which would allow me hook into the request pipeline that MediatR creates. This proved difficult in the end, as I had to use generic versions of the requests and responses and so could not easily serialise or deserialise the data.
+
+The 3rd version simply wrapped the awkward `IDistributedCache` API in another service that I created, but this still left the handlers having to make use of it.
+
+I finally settled on a version that made use of the [Scrutor](https://github.com/khellang/Scrutor) library, which allowed me to easily utilise the decorator pattern. I created implementations of the `IPokemonService` and `ITranslationService` which would both check the `IDistributedCache` and return what was there (if there was anything), before trying the actual implementations respectively. I like this because I meant I could remove all caching code from each of the handlers, and rely on the DI container to inject the cache version of each service instead.
+
